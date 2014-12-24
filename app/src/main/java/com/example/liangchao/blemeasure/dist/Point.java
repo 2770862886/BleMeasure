@@ -28,7 +28,6 @@ public class Point {
         this.cnt = cnt;
     }
 
-
     public float getForce(){
         return getX()*getX()+getY()*getY()+getZ()*getZ();
     }

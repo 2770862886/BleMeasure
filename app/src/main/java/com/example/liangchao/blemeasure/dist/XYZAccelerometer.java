@@ -8,7 +8,6 @@ import android.hardware.SensorManager;
  */
 public class XYZAccelerometer extends Accelerometer {
 
-
     private static final int BUFFER_SIZE = 500;
     // calibration
     private  float dX = 0;

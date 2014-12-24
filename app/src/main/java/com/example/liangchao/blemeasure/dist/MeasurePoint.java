@@ -25,7 +25,7 @@ public class MeasurePoint {
         calc();
     }
 
-    private void calc(){
+    private void calc() {
         //Acceleration as projection of current vector on average
         acceleration = this.x*averagePoint.getX() +
                 this.y*averagePoint.getY() +
@@ -34,13 +34,14 @@ public class MeasurePoint {
         float t = ((float)interval / 1000f);
         speedAfter = speedBefore + acceleration * t;
         distance = speedBefore*t + acceleration*t*t/2;
-
     }
 
-    public String getStoreString(){
+    public String getStoreString() {
         String s = "write here whatever you want";
         return s;
     }
 
-// add getters
+    public float getSpeedAfter() {
+        return speedAfter;
+    }
 }
