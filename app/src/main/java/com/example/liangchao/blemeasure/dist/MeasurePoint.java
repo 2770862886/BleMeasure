@@ -22,11 +22,12 @@ public class MeasurePoint {
         this.interval = interval;
         this.averagePoint = averagePoint;
         speedAfter = 0;
+
         calc();
     }
 
     private void calc() {
-        //Acceleration as projection of current vector on average
+        // Acceleration as projection of current vector on average
         acceleration = this.x*averagePoint.getX() +
                 this.y*averagePoint.getY() +
                 this.z*averagePoint.getZ();
@@ -43,5 +44,9 @@ public class MeasurePoint {
 
     public float getSpeedAfter() {
         return speedAfter;
+    }
+
+    public float getDistance() {
+        return distance;
     }
 }

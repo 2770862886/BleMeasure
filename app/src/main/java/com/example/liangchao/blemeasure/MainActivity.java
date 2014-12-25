@@ -1,5 +1,6 @@
 package com.example.liangchao.blemeasure;
 
+import android.content.DialogInterface;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.example.liangchao.blemeasure.dist.DistanceMeasure;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -50,16 +55,47 @@ public class MainActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment
+            implements
+            DistanceMeasure.MeasureListener,
+            View.OnClickListener {
+
+        TextView mSpeedView;
+        TextView mDistanceView;
+        Button mStartBtn;
 
         public PlaceholderFragment() {
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstance) {
+            super.onCreate(savedInstance);
+
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            mSpeedView = (TextView) rootView.findViewById(R.id.speed);
+            mDistanceView = (TextView) rootView.findViewById(R.id.distance);
+
+            mStartBtn = (Button) rootView.findViewById(R.id.start);
+            mStartBtn.setOnClickListener(this);
+
+            DistanceMeasure.getInstance(getActivity()).registerListener(this);
+
             return rootView;
+        }
+
+        @Override
+        public void onMeasureUpdate(float distance, float speed) {
+            mSpeedView.setText(speed + "");
+        }
+
+        @Override
+        public void onClick(View v) {
+            DistanceMeasure.getInstance(getActivity()).startMeasure();
         }
     }
 }

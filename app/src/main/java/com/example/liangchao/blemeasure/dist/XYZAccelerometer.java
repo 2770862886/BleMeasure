@@ -1,12 +1,13 @@
 package com.example.liangchao.blemeasure.dist;
 
+import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 
 /**
  * Created by liangchao on 12/24/14.
  */
-public class XYZAccelerometer extends Accelerometer {
+class XYZAccelerometer extends Accelerometer {
 
     private static final int BUFFER_SIZE = 500;
     // calibration
@@ -26,9 +27,8 @@ public class XYZAccelerometer extends Accelerometer {
 
     // returrns parameters, using buffer: average acceleration
     // since last call of getPoint().
-    public Point getPoint(){
-
-        if (cnt == 0){
+    public Point getPoint() {
+        if (cnt == 0) {
             return new Point(lastX, lastY, lastZ, 1);
         }
 
@@ -39,31 +39,29 @@ public class XYZAccelerometer extends Accelerometer {
     }
 
     // resets buffer
-    public void reset(){
+    public void reset() {
         cnt = 0;
         X = 0;
         Y = 0;
         Z = 0;
     }
 
-
-    public void onSensorChanged(SensorEvent se) {
-        float x = se.values[SensorManager.DATA_X] + dX;
-        float y = se.values[SensorManager.DATA_Y] + dY;
-        float z = se.values[SensorManager.DATA_Z] + dZ;
+    public void onSensorChanged(SensorEvent event) {
+        float x = event.values[0] + dX;
+        float y = event.values[1] + dY;
+        float z = event.values[2] + dZ;
 
         lastX = x;
         lastY = y;
         lastZ = z;
 
-        X+= x;
-        Y+= y;
-        Z+= z;
+        X += x;
+        Y += y;
+        Z += z;
 
         if (cnt < BUFFER_SIZE-1) {
-            cnt++;
-        } else
-        {
+            cnt ++;
+        } else {
             reset();
         }
     }

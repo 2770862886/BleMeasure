@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 
 /**
  * Created by liangchao on 12/24/14.
@@ -63,7 +64,7 @@ public class MeasureData {
         float y = 0;
         float z = 0;
 
-        for(int i = 0; i < mAccData.size(); ++i){
+        for (int i = 0; i < mAccData.size(); ++i) {
             Point p = mAccData.get(i);
             x += p.getX();
             y += p.getY();
@@ -73,12 +74,19 @@ public class MeasureData {
         return new Point(x, y, z, 1);
     }
 
-    public float getLastSpeed(){
-        return mData.getLast().getSpeedAfter();
+    public float getLastSpeed() {
+        try {
+            return mData.getLast().getSpeedAfter();
+        } catch (NoSuchElementException e) {
+            return 0f;
+        }
     }
 
-    public float getLastSpeedKm(){
-        float ms = getLastSpeed();
-        return ms*3.6f;
+    public float getDistance() {
+        try {
+            return mData.getLast().getDistance();
+        } catch (NoSuchElementException e) {
+            return 0f;
+        }
     }
 }

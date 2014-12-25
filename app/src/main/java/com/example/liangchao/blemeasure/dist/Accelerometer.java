@@ -7,7 +7,7 @@ import android.hardware.SensorEventListener;
 /**
  * Created by liangchao on 12/23/14.
  */
-public abstract class Accelerometer implements SensorEventListener {
+abstract class Accelerometer implements SensorEventListener {
 
     public abstract Point getPoint();
     protected float lastX, lastY, lastZ;

@@ -8,7 +8,7 @@ import android.os.Handler;
 /**
  * Created by liangchao on 12/24/14.
  */
-public class Calibrator {
+class Calibrator {
     private final static int UPDATE_INTERVAL = 400;
     private final static int ITERATIONS = 5;
 
