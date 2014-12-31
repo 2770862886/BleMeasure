@@ -3,6 +3,7 @@ package com.example.liangchao.blemeasure.dist;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
@@ -21,14 +22,18 @@ public class DistanceMeasure {
     private Handler mHandler;
     private Handler mClientHandler;
 
+    private Calibrator mCalibrator;
+
     private MeasureListener mListener;
 
     private static final int UPDATE_INTERVAL = 500;
 
     private static final int TIMER_DONE  = 0;
     private static final int MEASURE_START = 1;
-    private static final int MEASURE_END = 2;
+    private static final int MEASURE_STOP = 2;
     private static final int ERROR = 3;
+
+    private static final int CLIENT_UPDATE = 0;
 
     private Timer mTimer;
     private int mCount;
@@ -54,13 +59,24 @@ public class DistanceMeasure {
     }
 
     public void startMeasure() {
-        mData = new MeasureData(UPDATE_INTERVAL);
+        if (mData == null)
+            return;
+
         mHandler.sendEmptyMessage(MEASURE_START);
         mCount = 0;
     }
 
     public void stopMeasure() {
+        mHandler.sendEmptyMessage(MEASURE_STOP);
+    }
 
+    public void calibrate() {
+        mData = new MeasureData(UPDATE_INTERVAL);
+        mCalibrator.calibrate();
+    }
+
+    public void reset() {
+        mData.reset();
     }
 
     private DistanceMeasure(Context context) {
@@ -72,8 +88,9 @@ public class DistanceMeasure {
                     case TIMER_DONE:
                         onMeasureDone();
 
-                        if (mListener != null)
-                            mListener.onMeasureUpdate(0, mData.getLastSpeed());
+                        if (mListener != null) {
+                            mListener.onMeasureUpdate(mData.getDistance(), mData.getLastSpeed());
+                        }
                         break;
 
                     case MEASURE_START:
@@ -81,16 +98,27 @@ public class DistanceMeasure {
                         mTimer.scheduleAtFixedRate(
                             new TimerTask() {
                                 public void run() {
+                                    mCount ++;
                                     mData.addPoint(mAcceler.getPoint());
+                                    onMeasureDone();
 
-                                    mClientHandler.post(new Runnable() {
-                                        public void run() {
-                                            if (mListener != null)
-                                                mListener.onMeasureUpdate(mData.getDistance(), mData.getLastSpeed());
-                                        }
-                                    });
+                                    Message msg = mClientHandler.obtainMessage(CLIENT_UPDATE);
+                                    msg.getData().putFloat("s", mData.getLastSpeed());
+                                    msg.getData().putFloat("d", mData.getDistance());
+                                    mClientHandler.sendMessage(msg);
+
+                                    /*
+                                    if (mCount > 20) {
+                                        mTimer.cancel();
+                                        mHandler.sendEmptyMessage(TIMER_DONE);
+                                    }*/
                                 }
                             }, 0, UPDATE_INTERVAL);
+                        break;
+
+                    case MEASURE_STOP:
+                        mTimer.cancel();
+                        mHandler.sendEmptyMessage(TIMER_DONE);
                         break;
 
                     case ERROR:
@@ -105,10 +133,30 @@ public class DistanceMeasure {
         mSensorMgr = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mAcceler = new XYZAccelerometer();
         mSensorMgr.registerListener(mAcceler,
-                mSensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_UI);
+                mSensorMgr.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
+                SensorManager.SENSOR_DELAY_GAME);
 
-        mClientHandler = new Handler(context.getMainLooper());
+        mClientHandler = new Handler(context.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case CLIENT_UPDATE:
+                        Bundle data = msg.getData();
+                        if (data == null || mListener == null)
+                            break;
+
+                        float speed = data.getFloat("s");
+                        float distance = data.getFloat("d");
+
+                        mListener.onMeasureUpdate(distance, speed);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        };
+        mCalibrator = new Calibrator(mHandler, mAcceler, MEASURE_START);
     }
 
     private void onMeasureDone() {

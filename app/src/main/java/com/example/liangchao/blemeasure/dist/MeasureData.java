@@ -41,6 +41,11 @@ public class MeasureData {
         }
     }
 
+    public void reset() {
+        mAccData.clear();
+        mData.clear();
+    }
+
     public boolean saveExt(Context con, String fname) throws Throwable {
         try {
             File file = new File(con.getExternalFilesDir(null), fname);
